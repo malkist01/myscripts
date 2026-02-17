@@ -23,8 +23,8 @@ WORKDIR="$(pwd)"
 KERNEL="$WORKDIR/kernel"
 
 # Cloning Sources
-git clone --single-branch --depth=1 https://github.com/Asyanx/android_kernel_motorola_sm6375 -b lineage-23.2 $KERNEL && cd $KERNEL
-export LOCALVERSION=+🦖
+git clone --single-branch --depth=1 https://github.com/neophyteprjkt/kernel_xiaomi_ginkgo -b 13 $KERNEL && cd $KERNEL
+export LOCALVERSION=+malkist
 
 # Bail out if script fails
 set -e
@@ -58,7 +58,7 @@ KSU=0
 RELEASE=R1
 
 # The name of the Kernel, to name the ZIP
-ZIPNAME="Sea"
+ZIPNAME="Teletubies"
 if [ $KSU = 1 ]
 then
    VER="$RELEASE-KSU"
@@ -68,21 +68,21 @@ fi
 
 # Build Author
 # Take care, it should be a universal and most probably, case-sensitive
-AUTHOR="Asyanx"
-HOSTR="holy"
+AUTHOR="malkist01"
+HOSTR="android"
 
 # Architecture
 ARCH=arm64
 
 # The name of the device for which the kernel is built
-MODEL="Motorola G45"
+MODEL="Redmi Note 8"
 
 # The codename of the device
-DEVICE="fogos"
+DEVICE="ginkgo"
 
 # The defconfig which should be used. Get it from config.gz from
 # your device or check source
-DEFCONFIG=vendor/fogos_defconfig
+DEFCONFIG=vendor/ginkgo_defconfig
 
 # Specify compiler.
 # 'clang' or 'gcc'
@@ -111,8 +111,8 @@ PTTG=1
 if [ $PTTG = 1 ]
 then
 	# Set Telegram Chat ID
-	CHATID="-1002287610863"
-	TOKEN="7868194496:AAGY7WwRRbeCOPYOnczoCPh2psC43Q0F3JI"
+	CHATID="-1001910249307"
+	TOKEN="5501360993:AAFLnvOrkUpsFJktYu-snmimKNoGk7_WVw8"
 fi
 
 # Files/artifacts
@@ -121,6 +121,12 @@ FILES=Image
 # Build dtbo.img (select this only if your source has support to building dtbo.img)
 # 1 is YES | 0 is NO(default)
 BUILD_DTBO=0
+if [ $BUILD_DTBO = 1 ]
+then
+	# Set this to your dtbo path.
+	# Defaults in folder out/arch/arm64/boot/dts
+	DTBO_PATH="xiaomi/ginkgo-trinket-overlay.dtbo"
+fi
 
 # Sign the zipfile
 # 1 is YES | 0 is NO
@@ -191,7 +197,7 @@ WAKTU=$(date +"%F-%S")
 	fi
 
 	msger -n "|| Cloning Anykernel ||"
-	git clone --depth=1 https://github.com/MoeKernel/AnyKernel3 -b fogos AnyKernel3
+	git clone --depth=1 https://github.com/malkist01/AnyKernel2 -b master AnyKernel3
 
 	if [ $BUILD_DTBO = 1 ]
 	then
@@ -270,7 +276,7 @@ build_kernel()
 		tg_post_msg "<b>Sea CI Build Triggered</b>%0A<b>Docker OS: </b><code>$DISTRO</code>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Jakarta date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Host Core Count : </b><code>$PROCS</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0A<b>NON KernelSU:<code>No KSU</code>%0A</b><b>Top Commit : </b><code>$COMMIT_HEAD</code>"
     	fi
 	
-	make O=out $DEFCONFIG moto.config
+	make O=out $DEFCONFIG ginkgo.config
 	BUILD_START=$(date +"%s")
 	if [ $COMPILER = "clang" ]
 	then
