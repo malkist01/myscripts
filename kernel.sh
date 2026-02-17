@@ -23,7 +23,7 @@ WORKDIR="$(pwd)"
 KERNEL="$WORKDIR/kernel"
 
 # Cloning Sources
-git clone --single-branch --depth=1 https://github.com/neophyteprjkt/kernel_xiaomi_ginkgo -b 13 $KERNEL && cd $KERNEL
+git clone --single-branch --depth=1 https://github.com/malkist01/G1 -b su $KERNEL && cd $KERNEL
 export LOCALVERSION=+malkist
 
 # Bail out if script fails
