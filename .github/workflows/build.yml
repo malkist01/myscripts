@@ -1,6 +1,9 @@
-name: Asyanx Build
-
-on: [push]
+name: AtomX Kernel
+env:
+      TOKEN: ${{ secrets.BOT_API_KEY }}
+on:
+  workflow_dispatch:
+  push: {branches: ["master"]}
 
 jobs:
   kernel-build:
