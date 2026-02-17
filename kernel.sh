@@ -21,10 +21,16 @@
 # Kernel building script
 WORKDIR="$(pwd)"
 KERNEL="$WORKDIR/kernel"
+TC_DIR="${LOCAL_DIR}/toolchain"
+CLANG_DIR="${TC_DIR}/clang"
+ARCH_DIR="${TC_DIR}/aarch64-linux-android-4.9"
+ARM_DIR="${TC_DIR}/arm-linux-androideabi-4.9"
 
 # Cloning Sources
-git clone --single-branch --depth=1 https://github.com/malkist01/G1 -b su $KERNEL && cd $KERNEL
+git clone --single-branch --depth=1 https://github.com/neophyteprjkt/kernel_xiaomi_ginkgo -b 13 $KERNEL && cd $KERNEL
 export LOCALVERSION=+malkist
+export PATH="$CLANG_DIR/bin:$ARCH_DIR/bin:$ARM_DIR/bin:$PATH"
+export LD_LIBRARY_PATH="$CLANG_DIR/lib:$LD_LIBRARY_PATH"
 
 # Bail out if script fails
 set -e
@@ -88,13 +94,9 @@ DEFCONFIG=vendor/ginkgo_defconfig
 # 'clang' or 'gcc'
 COMPILER=clang		
 
-# Toolchain Directory defaults to gcc
-GCC64_DIR=$KERNEL_DIR/gcc64
-GCC32_DIR=$KERNEL_DIR/gcc32		
 
 # Toolchain Directory defaults to clang-llvm
 CLANG_VERSION="clang-20.0.0"
-TC_DIR=$KERNEL_DIR/clang-llvm
 
 # Build modules. 0 = NO | 1 = YES
 MODULES=0
@@ -182,19 +184,34 @@ WAKTU=$(date +"%F-%S")
  clone()
  {
 	echo " "
-	if [ $COMPILER = "gcc" ]
-	then
-		msger -n "|| Cloning GCC 9.3.0 baremetal ||"
-		git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git gcc64
-		git clone --depth=1 https://github.com/arter97/arm32-gcc.git gcc32
-	fi 
-	
-	if [ $COMPILER = "clang" ]
-	then
-		git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r547379.git ${TC_DIR}
-		export LLVM_DIR=$KERNEL_DIR/clang-llvm/bin
-		export LLVM=1
-	fi
+  if ! [ -d "${CLANG_DIR}" ]; then
+      echo "Clang not found! Downloading Google prebuilt..."
+      mkdir -p "${CLANG_DIR}"
+      wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/4d2864f08ff2c290563fb903a5156e0504620bbe/clang-r563880c.tar.gz -O clang.tar.gz
+      if [ $? -ne 0 ]; then
+          echo "Download failed! Aborting..."
+          exit 1
+      fi
+        echo "Extracting clang to ${CLANG_DIR}..."
+      tar -xf clang.tar.gz -C "${CLANG_DIR}"
+    rm -f clang.tar.gz
+  fi
+
+  if ! [ -d "${ARCH_DIR}" ]; then
+      echo "gcc not found! Cloning to ${ARCH_DIR}..."
+      if ! git clone --depth=1 -b main https://github.com/greenforce-project/gcc-arm64 ${ARCH_DIR}; then
+          echo "Cloning failed! Aborting..."
+          exit 1
+      fi
+  fi
+
+  if ! [ -d "${ARM_DIR}" ]; then
+      echo "gcc_32 not found! Cloning to ${ARM_DIR}..."
+      if ! git clone --depth=1 -b main https://github.com/greenforce-project/gcc-arm ${ARM_DIR}; then
+          echo "Cloning failed! Aborting..."
+          exit 1
+      fi
+  fi
 
 	msger -n "|| Cloning Anykernel ||"
 	git clone --depth=1 https://github.com/malkist01/AnyKernel2 -b master AnyKernel3
@@ -281,21 +298,20 @@ build_kernel()
 	if [ $COMPILER = "clang" ]
 	then
 		MAKE+=(
-  			CC=clang \
-			LD=${LLVM_DIR}/ld.lld \
-			ARCH=arm64 \
-			AS=${LLVM_DIR}/llvm-as \
-			AR=${LLVM_DIR}/llvm-ar \
-			NM=${LLVM_DIR}/llvm-nm \
-			OBJCOPY=${LLVM_DIR}/llvm-objcopy \
-			OBJDUMP=${LLVM_DIR}/llvm-objdump \
-			READELF=${LLVM_DIR}/llvm-readelf \
-			OBJSIZE=${LLVM_DIR}/llvm-size \
-			STRIP=${LLVM_DIR}/llvm-strip \
-			LLVM_AR=${LLVM_DIR}/llvm-ar \
-			LLVM_DIS=${LLVM_DIR}/llvm-dis \
-			LLVM_NM=${LLVM_DIR}/llvm-nm \
-			LLVM=1
+        ARCH=arm64 \
+        CC=clang \
+        LD=ld.lld \
+        AR=llvm-ar \
+        AS=llvm-as \
+        NM=llvm-nm \
+        OBJCOPY=llvm-objcopy \
+        OBJDUMP=llvm-objdump \
+        STRIP=llvm-strip \
+        CROSS_COMPILE=aarch64-linux-android- \
+        CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+        CLANG_TRIPLE=aarch64-linux-gnu- \
+        Image.gz-dtb \
+        dtbo.img 2>&1 | tee log.txt
      ) 
 	elif [ $COMPILER = "gcc" ]
 	then
