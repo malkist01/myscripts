@@ -116,7 +116,7 @@ then
 fi
 
 # Files/artifacts
-FILES=Image
+FILES=Image.gz
 
 # Build dtbo.img (select this only if your source has support to building dtbo.img)
 # 1 is YES | 0 is NO(default)
