@@ -1,15 +1,18 @@
-name: Kernel Build
-
+name: main
 on:
-  workflow_dispatch:
+   workflow_dispatch:
     inputs:
+      device:
+          description: 'Device'
+          default: 'ginkgo'
+          required: true
       repo:
           description: 'Kernel source'
-          default: 'https://github.com/malkist01/G1'
+          default: 'https://github.com/malkist01/Tobrut'
           required: true
       branch:
           description: 'Kernel source branch'
-          default: 'main'
+          default: '16'
           required: true
       token:
           description: 'Telegram bot token'
@@ -20,31 +23,29 @@ on:
           default: '-1002287610863'
           required: true
 
-
-env:
-  TZ: Asia/Jakarta
-  REPO: ${{ github.event.inputs.repo }}
-  BRANCH: ${{ github.event.inputs.branch }}
-  token: ${{ github.event.inputs.token }}
-  chat_id: ${{ github.event.inputs.chat_id }}
-
 jobs:
-  kernel-build:
-    runs-on: ubuntu-24.04
+  build:
+       runs-on: ubuntu-latest
 
-    steps:
-      - name: Initializing environment
-        run: |
-          sudo apt update
-          sudo apt install -y \
-          bc bison ca-certificates curl flex gcc git libc6-dev libssl-dev \
-          openssl python-is-python3 ssh wget zip sudo make clang \
-          gcc-arm-linux-gnueabi software-properties-common build-essential \
-          libarchive-tools gcc-aarch64-linux-gnu libssl-dev libffi-dev \
-          libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev \
-          libsqlite3-dev make gcc pigz python3 cpio lld
+       steps:
+       - name: Creating env!
+         uses: actions/checkout@v2
 
+       - name: Setting up env!
+         run: |
+              sudo -E apt-get -qq update
+              sudo -E apt-get -qq install git make bc bison -y ccache \
+              openssl curl zip kmod cpio flex libelf-dev \
+              libssl-dev libtfm-dev wget device-tree-compiler \
+              ca-certificates python3 python2 binutils \
+              binutils-aarch64-linux-gnu binutils-arm-linux-gnueabi
        - name: Building Kernel...
          run: |
-             chmod +x build.sh && bash build.sh
+             chmod +x kernel.sh && bash kernel.sh
              shell: bash
+             env:
+              TZ: Asia/Jakarta
+              REPO: ${{ github.event.inputs.repo }}
+              BRANCH: ${{ github.event.inputs.branch }}
+              token: ${{ github.event.inputs.token }}
+              chat_id: ${{ github.event.inputs.chat_id }}
