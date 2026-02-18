@@ -1,6 +1,4 @@
 name: Kernel Build
-env:
-  TOK: ${{ secrets.BOT_API_KEY }}
 
 on:
   workflow_dispatch:
@@ -46,5 +44,7 @@ jobs:
           libncurses5-dev zlib1g zlib1g-dev libreadline-dev libbz2-dev \
           libsqlite3-dev make gcc pigz python3 cpio lld
 
-      - name: Build Kernel
-        run: bash kernel.sh
+       - name: Building Kernel...
+         run: |
+             chmod +x build.sh && bash build.sh
+             shell: bash
