@@ -155,10 +155,10 @@ compile() {
         exit 1
     fi
 
-    git clone --depth=1 https://github.com/malkist01/AnyKernel2.git AnyKernel -b main
+    git clone --depth=1 https://github.com/malkist01/AnyKernel2.git AnyKernel -b master
     cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
     cp out/arch/arm64/boot/dtbo.img AnyKernel
-    cp out/arch/arm64/boot/dtb.img AnyKernel
+    cp out/arch/arm64/boot/dtb AnyKernel
 }
 # Zipping
 zipping() {
