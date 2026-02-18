@@ -1,4 +1,6 @@
 name: Kernel Build
+env:
+      TOKEN: ${{ secrets.BOT_API_KEY }}
 
 on:
   workflow_dispatch:
