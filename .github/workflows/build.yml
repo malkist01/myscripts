@@ -1,6 +1,6 @@
 name: Kernel Build
 env:
-      TOK: ${{ secrets.BOT_API_KEY }}
+  TOK: ${{ secrets.BOT_API_KEY }}
 
 on:
   workflow_dispatch:
